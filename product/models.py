@@ -52,4 +52,3 @@ class ViewingLesson(models.Model):
             self.viewed = True
         else:
             self.viewed = False
-        self.save()
