@@ -1,16 +1,14 @@
 from rest_framework import serializers
-from models import Lesson, ViewingLesson
+from lessons.product.models import Lesson, LessonView
 
 
-class LessonsListSerializer(serializers.ModelSerializer):
-    # Сериализатор для списка уроков
+class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        field = '__all__'
+        fields = '__all__'
 
 
-class ViewingLessonSerializer(serializers.ModelSerializer):
-    # Сериализатор для статуса и времени просмотра
+class LessonViewSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ViewingLesson
-        field = '__all__'
+        model = LessonView
+        fields = '__all__'

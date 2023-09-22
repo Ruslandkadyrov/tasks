@@ -1,23 +1,27 @@
-from rest_framework import viewsets
-from models import Lesson
-from serializers import LessonsListSerializer
-from permissions import IsOwnerOrReadOnly
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from models import Lesson, Access, LessonView
+from serializers import LessonSerializer, LessonViewSerializer
 
 
-class LessonsViewSet(viewsets.ModelViewSet):
-    # Вью для вывода списка уроков
+class LessonListAPIView(generics.ListAPIView):
     queryset = Lesson.objects.all()
-    serializer_class = LessonsListSerializer
-    permission_classes = [IsOwnerOrReadOnly, ]
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        accessible_products = Access.objects.filter(user=user).values_list(
+            'product_id', flat=True)
+        return Lesson.objects.filter(product_id__in=accessible_products)
 
 
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+class ProductLessonsAPIView(generics.ListAPIView):
+    serializer_class = LessonViewSerializer
+    permission_classes = [IsAuthenticated]
 
-    @action(detail=True, methods=['get'])
-    def lessons(self, request, pk=None):
-        product = self.get_object()
-        lessons = product.lessons.all()
-        serializer = LessonSerializer(lessons, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        user = self.request.user
+        product_id = self.kwargs['product_id']
+        return LessonView.objects.filter(
+            user=user, lesson__product_id=product_id)

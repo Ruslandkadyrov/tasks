@@ -1,10 +1,10 @@
-from django.urls import path, include
-from rest_framework import routers
-from product.views import LessonsViewSet
-
-router = routers.DefaultRouter()
-router.register('lessons', LessonsViewSet, basename='lessons')
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('v1/', include(router.urls))
-]
+    path(
+        'api/lessons/', views.LessonListAPIView.as_view(), name='lesson-list'),
+    path(
+        'api/products/<int:product_id>/lessons/',
+        views.ProductLessonsAPIView.as_view(),
+        name='product-lessons'),]

@@ -5,50 +5,27 @@ User = get_user_model()
 
 
 class Product(models.Model):
-    # Модель продукта.
-    name = models.CharField(max_length=100)
-    owner = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="products"
-    )
+    name = models.CharField(max_length=255)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Lesson(models.Model):
-    # Модель урока с полями:
-    # название, ссылка на видео, длительность просмотра,
-    # продукты
-    name = models.CharField(max_length=100)
-    products = models.ManyToManyField(
-        Product,
-        related_name='lessons'
-    )
-    link_video = models.URLField(max_length=300)
-    viewing_duration = models.IntegerField()
+    name = models.CharField(max_length=255)
+    video_link = models.URLField()
+    duration_seconds = models.IntegerField()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
-class ViewingLesson(models.Model):
-    # Модель: просмотрен урок или нет
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="viewinglesson"
-    )
-    lesson = models.ForeignKey(
-        Lesson,
-        on_delete=models.CASCADE,
-        related_name="viewinglesson"
-    )
-    viewed_duration = models.IntegerField(default=0)
-    viewed = models.BooleanField(default=False)
+class Access(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
-    def viewed_or_not_viewed(self):
-        # Метод который определяет просмотрен ли урок или нет
-        # Если проомтрен на 80 и более процентов - то он является просмотренным
-        viewing_percentage = (
-            self.viewed_duration / self.lesson.viewing_duration
-        ) * 100
-        if viewing_percentage >= 80:
-            self.viewed = True
-        else:
-            self.viewed = False
+
+class LessonView(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    watched = models.BooleanField()
+    watch_time_seconds = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now=True)
